@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  cinta-calendar:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.zerde.co/diaxel/ai}
+        VITE_ORGANIZATION: ${VITE_ORGANIZATION:-cinta}
+        VITE_STAFF_ID: ${VITE_STAFF_ID:-12001}
+        VITE_DURATION: ${VITE_DURATION:-60}
+    container_name: cinta-calendar
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:80"
