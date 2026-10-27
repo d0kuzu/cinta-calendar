@@ -9,7 +9,7 @@ RUN npm ci
 COPY . .
 
 # Build arguments for Vite
-ARG VITE_API_BASE_URL=https://api.zerde.co/diaxel/ai
+ARG VITE_API_BASE_URL=https://api.zerde.co/diaxel
 ARG VITE_ORGANIZATION=cinta
 ARG VITE_STAFF_ID=12001
 ARG VITE_DURATION=60

@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.zerde.co/diaxel/ai}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.zerde.co/diaxel}
         VITE_ORGANIZATION: ${VITE_ORGANIZATION:-cinta}
         VITE_STAFF_ID: ${VITE_STAFF_ID:-12001}
         VITE_DURATION: ${VITE_DURATION:-60}

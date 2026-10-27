@@ -2,7 +2,7 @@ const env = import.meta.env
 
 export const config = {
   /** Base URL of the backend (without trailing slash) */
-  apiBaseUrl: (env.VITE_API_BASE_URL || 'https://api.zerde.co/diaxel/ai').replace(/\/+$/, ''),
+  apiBaseUrl: (env.VITE_API_BASE_URL || 'https://api.zerde.co/diaxel').replace(/\/+$/, ''),
   /** CampusLogin organization on the backend side: "cinta" | "canada" */
   organization: env.VITE_ORGANIZATION || 'cinta',
   /** CampusLogin staff (user) id whose availability is shown */
