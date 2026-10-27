@@ -176,7 +176,7 @@
   inset: 0;
   width: 40%;
   background: linear-gradient(90deg, transparent, var(--day-selected), transparent);
-  animation: progress 1.1s ease-in-out infinite;
+  animation: progress 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .cal__grid {
@@ -258,7 +258,7 @@
 .day--loading {
   background: linear-gradient(90deg, #f1f2f4 0%, #f7f7f9 50%, #f1f2f4 100%);
   background-size: 200% 100%;
-  animation: shimmer 1.3s linear infinite;
+  animation: shimmer 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .day__badge {
@@ -411,7 +411,7 @@
   background-size: 200% 100%;
   animation:
     slot-in 280ms ease both,
-    shimmer 1.3s linear infinite;
+    shimmer 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .slots__state {
@@ -482,19 +482,19 @@
 }
 
 @keyframes shimmer {
-  from {
-    background-position: 200% 0;
+  0% {
+    background-position: 150% 0;
   }
-  to {
-    background-position: -200% 0;
+  100% {
+    background-position: -150% 0;
   }
 }
 
 @keyframes progress {
-  from {
+  0% {
     transform: translateX(-100%);
   }
-  to {
+  100% {
     transform: translateX(250%);
   }
 }
@@ -855,7 +855,7 @@
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #ffffff;
   border-radius: 50%;
-  animation: spin 700ms linear infinite;
+  animation: spin 1.1s linear infinite;
 }
 
 /* Success Screen inside Modal */
