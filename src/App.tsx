@@ -52,6 +52,7 @@ export default function App() {
     const params = new URLSearchParams(window.location.search)
     const phone =
       params.get('phone') ||
+      params.get('client') ||
       params.get('tel') ||
       params.get('telephone') ||
       params.get('mobile') ||
