@@ -6,6 +6,7 @@ import { InfoPanel } from './components/InfoPanel'
 import { SlotList, type SlotsStatus } from './components/SlotList'
 import { config } from './config'
 import {
+  addDays,
   addMonths,
   buildMonthGrid,
   groupSlotsByDay,
@@ -28,6 +29,8 @@ export default function App() {
   const tz = config.timeZone
   const today = useMemo(() => todayInTz(tz), [tz])
   const todayParts = parseYMD(today)
+  const maxDate = useMemo(() => addDays(today, config.maxDaysAhead), [today])
+  const maxDateParts = useMemo(() => parseYMD(maxDate), [maxDate])
 
   const [view, setView] = useState({ y: todayParts.y, m: todayParts.m })
   const [months, setMonths] = useState<Record<string, MonthState>>({})
@@ -71,16 +74,19 @@ export default function App() {
   const grid = useMemo(() => buildMonthGrid(view.y, view.m), [view.y, view.m])
   const current = months[key]
 
-  // Fetch free slots for the visible month (from today, through the last visible cell)
+  // Fetch free slots for the visible month (capped at maxDate = today + 7 days)
   useEffect(() => {
     if (monthsRef.current[key]?.status === 'success') return
 
     const firstOfMonth = makeYMD(view.y, view.m, 1)
     const lastCell = [...grid].reverse().find((c) => c !== null)
     const from = firstOfMonth < today ? today : firstOfMonth
-    const to = lastCell?.ymd ?? firstOfMonth
+    let to = lastCell?.ymd ?? firstOfMonth
+    if (to > maxDate) {
+      to = maxDate
+    }
 
-    if (to < today) {
+    if (to < today || from > maxDate) {
       setMonths((prev) => ({ ...prev, [key]: { status: 'success', days: {} } }))
       return
     }
@@ -90,7 +96,7 @@ export default function App() {
 
     fetchAvailability(from, to, ctrl.signal)
       .then((res) => {
-        const days = groupSlotsByDay(res.slots, tz)
+        const days = groupSlotsByDay(res.slots, tz, new Date(), maxDate)
         setMonths((prev) => ({ ...prev, [key]: { status: 'success', days } }))
       })
       .catch((err: unknown) => {
@@ -100,7 +106,7 @@ export default function App() {
       })
 
     return () => ctrl.abort()
-  }, [key, reloadToken, grid, today, tz, view.y, view.m])
+  }, [key, reloadToken, grid, today, maxDate, tz, view.y, view.m])
 
   // All loaded days across months (so trailing next-month cells light up too)
   const availableDays = useMemo(() => {
@@ -115,11 +121,11 @@ export default function App() {
   useEffect(() => {
     if (current?.status !== 'success') return
     setSelected((prev) => {
-      if (prev && prev.startsWith(key) && availableDays[prev]?.length) return prev
-      const first = grid.find((c) => c && c.inMonth && c.ymd >= today && current.days[c.ymd]?.length)
+      if (prev && prev.startsWith(key) && prev >= today && prev <= maxDate && availableDays[prev]?.length) return prev
+      const first = grid.find((c) => c && c.inMonth && c.ymd >= today && c.ymd <= maxDate && current.days[c.ymd]?.length)
       return first ? first.ymd : null
     })
-  }, [current, grid, key, today, availableDays])
+  }, [current, grid, key, today, maxDate, availableDays])
 
   const toggleFormat = useCallback((value: boolean) => {
     setHour12(value)
@@ -155,6 +161,7 @@ export default function App() {
 
   const goMonth = (delta: number) => setView((v) => addMonths(v.y, v.m, delta))
   const canGoPrev = view.y * 12 + view.m > todayParts.y * 12 + todayParts.m
+  const canGoNext = view.y * 12 + view.m < maxDateParts.y * 12 + maxDateParts.m
 
   let slotsStatus: SlotsStatus = 'success'
   let slots: string[] = []
@@ -175,10 +182,12 @@ export default function App() {
           month={view.m}
           grid={grid}
           today={today}
+          maxDate={maxDate}
           selected={selected}
           availableDays={availableDays}
           loading={current?.status === 'loading'}
           canGoPrev={canGoPrev}
+          canGoNext={canGoNext}
           onPrev={() => goMonth(-1)}
           onNext={() => goMonth(1)}
           onSelect={setSelected}

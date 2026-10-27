@@ -41,6 +41,12 @@ export function addMonths(y: number, m: number, delta: number) {
   return { y: Math.floor(idx / 12), m: (idx % 12) + 1 }
 }
 
+export function addDays(ymd: YMD, days: number): YMD {
+  const { y, m, d } = parseYMD(ymd)
+  const dt = new Date(Date.UTC(y, m - 1, d + days))
+  return makeYMD(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate())
+}
+
 export interface CalendarCell {
   ymd: YMD
   day: number
@@ -74,6 +80,7 @@ export function groupSlotsByDay(
   slots: Record<string, AvailabilitySlot[]> | null | undefined,
   timeZone: string,
   now: Date = new Date(),
+  maxDate?: YMD,
 ): Record<YMD, string[]> {
   const result: Record<YMD, string[]> = {}
   if (!slots) return result
@@ -83,6 +90,7 @@ export function groupSlotsByDay(
       const date = new Date(slot.time)
       if (Number.isNaN(date.getTime()) || date <= now) continue
       const day = toYMDInTz(date, timeZone)
+      if (maxDate && day > maxDate) continue
       ;(result[day] ??= []).push(slot.time)
     }
   }

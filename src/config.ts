@@ -9,6 +9,8 @@ export const config = {
   staffId: Number(env.VITE_STAFF_ID || 12001),
   /** Slot duration in minutes */
   duration: Number(env.VITE_DURATION || 60),
+  /** Maximum days ahead allowed for booking */
+  maxDaysAhead: Number(env.VITE_MAX_DAYS_AHEAD || 7),
   /** All dates/times are shown in San Francisco time */
   timeZone: 'America/Los_Angeles',
 

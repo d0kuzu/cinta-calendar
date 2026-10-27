@@ -9,10 +9,12 @@ interface CalendarProps {
   month: number
   grid: (CalendarCell | null)[]
   today: YMD
+  maxDate?: YMD
   selected: YMD | null
   availableDays: Record<YMD, string[]>
   loading: boolean
   canGoPrev: boolean
+  canGoNext: boolean
   onPrev: () => void
   onNext: () => void
   onSelect: (day: YMD) => void
@@ -23,10 +25,12 @@ export function Calendar({
   month,
   grid,
   today,
+  maxDate,
   selected,
   availableDays,
   loading,
   canGoPrev,
+  canGoNext,
   onPrev,
   onNext,
   onSelect,
@@ -53,6 +57,7 @@ export function Calendar({
             type="button"
             className="icon-btn"
             onClick={onNext}
+            disabled={!canGoNext}
             aria-label="Next month"
           >
             <ChevronRight />
@@ -73,7 +78,8 @@ export function Calendar({
           if (!cell) return <div key={`blank-${i}`} className="cal__blank" />
 
           const isPast = cell.ymd < today
-          const isAvailable = !isPast && (availableDays[cell.ymd]?.length ?? 0) > 0
+          const isBeyondMax = maxDate ? cell.ymd > maxDate : false
+          const isAvailable = !isPast && !isBeyondMax && (availableDays[cell.ymd]?.length ?? 0) > 0
           const isSelected = cell.ymd === selected
           const isToday = cell.ymd === today
 
@@ -83,7 +89,7 @@ export function Calendar({
             isSelected && 'day--selected',
             isToday && 'day--today',
             !cell.inMonth && 'day--outside',
-            loading && !isAvailable && !isPast && 'day--loading',
+            loading && !isAvailable && !isPast && !isBeyondMax && 'day--loading',
           ]
             .filter(Boolean)
             .join(' ')
