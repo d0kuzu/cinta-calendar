@@ -13,6 +13,7 @@ interface SlotListProps {
   timeZone: string
   onToggleFormat: (hour12: boolean) => void
   onRetry: () => void
+  onSelectSlot: (slotIso: string) => void
 }
 
 export function SlotList({
@@ -24,6 +25,7 @@ export function SlotList({
   timeZone,
   onToggleFormat,
   onRetry,
+  onSelectSlot,
 }: SlotListProps) {
   const heading = day ? formatDayHeading(day) : null
 
@@ -93,9 +95,18 @@ export function SlotList({
         {status === 'success' && slots.length > 0 && (
           <ul className="slots__list" key={day ?? 'none'}>
             {slots.map((iso, i) => (
-              <li key={iso} className="slot" style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}>
-                <span className="slot__dot" aria-hidden />
-                <time dateTime={iso}>{formatTime(iso, timeZone, hour12)}</time>
+              <li key={iso}>
+                <button
+                  type="button"
+                  className="slot slot--btn"
+                  style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
+                  onClick={() => onSelectSlot(iso)}
+                  title={`Book tour for ${formatTime(iso, timeZone, hour12)}`}
+                >
+                  <span className="slot__dot" aria-hidden />
+                  <time dateTime={iso}>{formatTime(iso, timeZone, hour12)}</time>
+                  <span className="slot__action">Book</span>
+                </button>
               </li>
             ))}
           </ul>

@@ -7,7 +7,12 @@ function formatDuration(minutes: number) {
   return `${minutes}m`
 }
 
-export function InfoPanel() {
+interface InfoPanelProps {
+  prefilledName?: string
+  prefilledPhone?: string
+}
+
+export function InfoPanel({ prefilledName, prefilledPhone }: InfoPanelProps) {
   const { event } = config
   const initials = event.organization
     .split(' ')
@@ -24,6 +29,15 @@ export function InfoPanel() {
       <h1 className="info__title">{event.title}</h1>
       <p className="info__desc">{event.description}</p>
 
+      {prefilledName && (
+        <div className="info__visitor" title={prefilledPhone ? `Phone: ${prefilledPhone}` : undefined}>
+          <span className="info__visitor-dot" aria-hidden />
+          <span>
+            Personal link for <strong>{prefilledName}</strong>
+          </span>
+        </div>
+      )}
+
       <ul className="info__meta">
         <li>
           <ClockIcon />
@@ -35,7 +49,7 @@ export function InfoPanel() {
         </li>
         <li title="All times are shown in San Francisco time">
           <GlobeIcon />
-          <span>America/Los_Angeles</span>
+          <span>America/Los_Angeles (PT)</span>
         </li>
       </ul>
     </aside>

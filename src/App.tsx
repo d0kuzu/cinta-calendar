@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { fetchAvailability } from './api/availability'
+import { fetchAvailability, type BookingResponse } from './api/availability'
+import { BookingModal } from './components/BookingModal'
 import { Calendar } from './components/Calendar'
 import { InfoPanel } from './components/InfoPanel'
 import { SlotList, type SlotsStatus } from './components/SlotList'
@@ -33,6 +34,33 @@ export default function App() {
   const [selected, setSelected] = useState<YMD | null>(null)
   const [reloadToken, setReloadToken] = useState(0)
   const [hour12, setHour12] = useState(() => localStorage.getItem(HOUR12_STORAGE_KEY) === '1')
+
+  // Booking Modal State
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const [isBookingOpen, setIsBookingOpen] = useState(false)
+
+  // URL Prefill State (e.g. ?phone=+14155551234&name=Jane&email=jane@example.com)
+  const [prefilledPhone, setPrefilledPhone] = useState('')
+  const [prefilledName, setPrefilledName] = useState('')
+  const [prefilledEmail, setPrefilledEmail] = useState('')
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const phone =
+      params.get('phone') ||
+      params.get('tel') ||
+      params.get('telephone') ||
+      params.get('mobile') ||
+      params.get('p') ||
+      ''
+    const name = params.get('name') || params.get('first_name') || ''
+    const email = params.get('email') || ''
+
+    if (phone) setPrefilledPhone(phone.trim())
+    if (name) setPrefilledName(name.trim())
+    if (email) setPrefilledEmail(email.trim())
+  }, [])
 
   const monthsRef = useRef(months)
   useEffect(() => {
@@ -107,6 +135,24 @@ export default function App() {
     setReloadToken((t) => t + 1)
   }, [key])
 
+  const handleSelectSlot = useCallback((slotIso: string) => {
+    setSelectedSlot(slotIso)
+    setIsBookingOpen(true)
+  }, [])
+
+  const handleBookingSuccess = useCallback(
+    (_resp: BookingResponse) => {
+      // Invalidate the current month's cache so the booked slot is refreshed immediately
+      setMonths((prev) => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+      setReloadToken((t) => t + 1)
+    },
+    [key],
+  )
+
   const goMonth = (delta: number) => setView((v) => addMonths(v.y, v.m, delta))
   const canGoPrev = view.y * 12 + view.m > todayParts.y * 12 + todayParts.m
 
@@ -123,7 +169,7 @@ export default function App() {
   return (
     <main className="page">
       <div className="booker">
-        <InfoPanel />
+        <InfoPanel prefilledName={prefilledName} prefilledPhone={prefilledPhone} />
         <Calendar
           year={view.y}
           month={view.m}
@@ -146,9 +192,22 @@ export default function App() {
           timeZone={tz}
           onToggleFormat={toggleFormat}
           onRetry={retry}
+          onSelectSlot={handleSelectSlot}
         />
       </div>
-      <p className="page__note">All times are shown in Pacific Time (San Francisco).</p>
+
+      <BookingModal
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
+        slotIso={selectedSlot}
+        day={selected}
+        hour12={hour12}
+        timeZone={tz}
+        prefilledPhone={prefilledPhone}
+        prefilledName={prefilledName}
+        prefilledEmail={prefilledEmail}
+        onBookingSuccess={handleBookingSuccess}
+      />
     </main>
   )
 }
