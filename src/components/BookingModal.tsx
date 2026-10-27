@@ -113,13 +113,9 @@ export function BookingModal({
     return d.length >= 10
   }, [prefilledPhone])
 
-  if (!isOpen || !slotIso) return null
-
-  const heading = day ? formatDayHeading(day) : null
-  const formattedStartTime = formatTime(slotIso, timeZone, hour12)
-
-  // Calculate formatted end time (+duration)
+  // Calculate formatted end time (+duration) before any early return
   const endTimeStr = useMemo(() => {
+    if (!slotIso) return ''
     try {
       const d = new Date(slotIso)
       const end = new Date(d.getTime() + config.duration * 60000)
@@ -128,6 +124,11 @@ export function BookingModal({
       return ''
     }
   }, [slotIso, timeZone, hour12])
+
+  if (!isOpen || !slotIso) return null
+
+  const heading = day ? formatDayHeading(day) : null
+  const formattedStartTime = formatTime(slotIso, timeZone, hour12)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

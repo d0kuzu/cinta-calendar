@@ -196,18 +196,20 @@ export default function App() {
         />
       </div>
 
-      <BookingModal
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-        slotIso={selectedSlot}
-        day={selected}
-        hour12={hour12}
-        timeZone={tz}
-        prefilledPhone={prefilledPhone}
-        prefilledName={prefilledName}
-        prefilledEmail={prefilledEmail}
-        onBookingSuccess={handleBookingSuccess}
-      />
+      {isBookingOpen && selectedSlot && (
+        <BookingModal
+          isOpen={isBookingOpen}
+          onClose={() => setIsBookingOpen(false)}
+          slotIso={selectedSlot}
+          day={selected}
+          hour12={hour12}
+          timeZone={tz}
+          prefilledPhone={prefilledPhone}
+          prefilledName={prefilledName}
+          prefilledEmail={prefilledEmail}
+          onBookingSuccess={handleBookingSuccess}
+        />
+      )}
     </main>
   )
 }
