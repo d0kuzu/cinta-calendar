@@ -33,32 +33,6 @@ function formatPhoneDisplay(raw: string) {
   return raw
 }
 
-function makeGoogleCalendarUrl(
-  title: string,
-  startIso: string,
-  durationMinutes: number,
-  details: string,
-  location: string,
-) {
-  try {
-    const start = new Date(startIso)
-    const end = new Date(start.getTime() + durationMinutes * 60000)
-    const pad = (n: number) => String(n).padStart(2, '0')
-    const toUtcStr = (d: Date) =>
-      `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`
-    const dates = `${toUtcStr(start)}/${toUtcStr(end)}`
-    const params = new URLSearchParams({
-      action: 'TEMPLATE',
-      text: title,
-      dates,
-      details,
-      location,
-    })
-    return `https://calendar.google.com/calendar/render?${params.toString()}`
-  } catch {
-    return '#'
-  }
-}
 
 export function BookingModal({
   isOpen,
@@ -164,16 +138,6 @@ export function BookingModal({
       setIsSubmitting(false)
     }
   }
-
-  const gCalUrl = slotIso
-    ? makeGoogleCalendarUrl(
-        config.event.title,
-        slotIso,
-        config.duration,
-        `${config.event.description}\nHost: ${config.event.organization}`,
-        config.event.address,
-      )
-    : '#'
 
   return (
     <div className="modal-backdrop" onClick={() => !isSubmitting && onClose()}>
@@ -380,14 +344,6 @@ export function BookingModal({
             </div>
 
             <div className="modal-success__actions">
-              <a
-                href={gCalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn--secondary"
-              >
-                Add to Google Calendar
-              </a>
               <button type="button" className="btn btn--primary" onClick={onClose}>
                 Done
               </button>
